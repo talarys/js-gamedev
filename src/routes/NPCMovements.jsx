@@ -22,6 +22,12 @@ const enemyTypes = [
     spriteWidth: 293,
     spriteHeight: 155,
     spriteFrames: 6,
+    move(x, y) {
+      return [
+        (x + Math.random() * 5 - 2.5),
+        (y + Math.random() * 5 - 2.5),
+      ];
+    },
   },
   {
     img: enemy2Img,
@@ -44,7 +50,6 @@ const enemyTypes = [
 ];
 
 const enemyArr = [];
-let draw = () => {};
 
 class Enemy {
   constructor(enemyType, x, y) {
@@ -54,6 +59,7 @@ class Enemy {
     this.spriteWidth = enemyType.spriteWidth;
     this.spriteHeight = enemyType.spriteHeight;
     this.spriteFrames = enemyType.spriteFrames;
+    this.move = enemyType.move;
   }
 
   draw(ctx, frameCount) {
@@ -65,11 +71,24 @@ class Enemy {
       this.spriteHeight,
       this.x,
       this.y,
-      this.spriteWidth,
-      this.spriteHeight,
+      this.spriteWidth / 2,
+      this.spriteHeight / 2,
     );
   }
+
+  update(ctx) {
+    [this.x, this.y] = this.move(this.x, this.y);
+    if (this.x > ctx.canvas.width) { this.x = ctx.canvas.width; }
+    if (this.x < 0) { this.x = 0; }
+    if (this.y > ctx.canvas.width) { this.y = ctx.canvas.height; }
+    if (this.y < 0) { this.y = 0; }
+  }
 }
+const draw = (ctx, frameCount) => {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  enemyArr.forEach((enemy) => enemy.draw(ctx, frameCount));
+  enemyArr.forEach((enemy) => enemy.update(ctx));
+};
 
 function NPCMovements() {
   const canvasRef = useCanvas(draw);
@@ -77,17 +96,12 @@ function NPCMovements() {
   useEffect(() => {
     for (let i = 0; i < 5; i += 1) {
       enemyArr.push(new Enemy(
-        enemyTypes[3],
-        Math.floor(Math.random() * canvasRef.current.width),
-        Math.floor(Math.random() * canvasRef.current.height),
+        enemyTypes[0],
+        Math.floor(Math.random() * (canvasRef.current.width - 200)),
+        Math.floor(Math.random() * (canvasRef.current.height - 200)),
       ));
     }
-
-    draw = (ctx, frameCount) => {
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      enemyArr.forEach((enemy) => enemy.draw(ctx, frameCount));
-    };
-  }, []);
+  }, [draw]);
 
   return (
     <div>
