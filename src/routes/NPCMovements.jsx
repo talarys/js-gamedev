@@ -1,3 +1,5 @@
+/* eslint-disable no-useless-constructor */
+/* eslint-disable max-classes-per-file */
 import { useEffect } from 'react';
 import useCanvas from '../hooks/useCanvas';
 
@@ -47,6 +49,24 @@ const enemyTypes = [
 
 const enemyArr = [];
 
+const limitX = (ctx, spriteWidth, posX) => {
+  if (posX > ctx.canvas.width - spriteWidth / 2 - 5) {
+    return ctx.canvas.width - spriteWidth / 2 - 5;
+  } if (posX < 5) {
+    return 5;
+  }
+  return posX;
+};
+
+const limitY = (ctx, spriteHeight, posY) => {
+  if (posY > ctx.canvas.height - spriteHeight / 2 - 5) {
+    return ctx.canvas.height - spriteHeight / 2 - 5;
+  } if (posY < 5) {
+    return 5;
+  }
+  return posY;
+};
+
 class Enemy {
   constructor(enemyType, x, y) {
     this.x = x;
@@ -72,9 +92,23 @@ class Enemy {
   }
 }
 
+class Enemy1 extends Enemy {
+  constructor(enemyType, x, y) {
+    super(enemyType, x, y);
+  }
+
+  update(ctx) {
+    this.x += Math.random() * 5 - 2.5;
+    this.x = limitX(ctx, this.spriteWidth, this.x);
+    this.y += Math.random() * 5 - 2.5;
+    this.y = limitY(ctx, this.spriteWidth, this.y);
+  }
+}
+
 const draw = (ctx, frameCount) => {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   enemyArr.forEach((enemy) => enemy.draw(ctx, frameCount));
+  enemyArr.forEach((enemy) => enemy.update(ctx));
 };
 
 function NPCMovements() {
@@ -82,7 +116,7 @@ function NPCMovements() {
 
   useEffect(() => {
     for (let i = 0; i < 5; i += 1) {
-      enemyArr.push(new Enemy(
+      enemyArr.push(new Enemy1(
         enemyTypes[0],
         Math.floor(Math.random() * (canvasRef.current.width - 200)),
         Math.floor(Math.random() * (canvasRef.current.height - 200)),
